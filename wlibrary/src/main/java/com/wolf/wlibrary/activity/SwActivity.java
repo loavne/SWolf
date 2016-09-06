@@ -1,7 +1,7 @@
 package com.wolf.wlibrary.activity;
 
-import android.app.Activity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 
 /**
  * 描述：Activity基类
@@ -9,7 +9,7 @@ import android.os.Bundle;
  * @author: swolf (https://github.com/loavne)
  * @date : 2016-09-02 10:53
  */
-public abstract class SwActivity extends Activity {
+public abstract class SwActivity extends AppCompatActivity{
 
     /** 是否透明状态栏 */
     private boolean isStatusBar = true;
@@ -36,6 +36,8 @@ public abstract class SwActivity extends Activity {
      * 获取布局资源Id
      */
     public abstract int getLayoutId();
+
+
 
 
 }
