@@ -27,8 +27,14 @@ public abstract class SwActivity extends Activity {
         initData();
     }
 
+    /**
+     * 初始化
+     */
     protected abstract void initData();
 
+    /**
+     * 获取布局资源Id
+     */
     public abstract int getLayoutId();
 
 
