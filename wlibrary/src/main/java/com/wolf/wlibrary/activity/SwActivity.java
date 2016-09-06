@@ -1,7 +1,14 @@
 package com.wolf.wlibrary.activity;
 
+import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
+import android.view.WindowManager;
+
+import com.wolf.wlibrary.base.SwActivityManager;
+import com.wolf.wlibrary.utils.IntentUtil;
 
 /**
  * 描述：Activity基类
@@ -20,11 +27,16 @@ public abstract class SwActivity extends AppCompatActivity{
     /** 是否输出日志 */
     private boolean isShowDebug = true;
 
+    protected Toolbar mToolbar;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(getLayoutId());
+
         initData();
+        SwActivityManager.getInstance().addActivity(this);
     }
 
     /**
@@ -37,7 +49,47 @@ public abstract class SwActivity extends AppCompatActivity{
      */
     public abstract int getLayoutId();
 
+    /**
+     * 透明状态栏
+     */
+    private void setStatusBar() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            getWindow().addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+        }
+    }
 
+    /**
+     * 透明导航栏
+     */
+    private void setNavigation() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            getWindow().addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
+        }
+    }
+
+    /**
+     * 启动activity
+     * @param clz
+     */
+    public void openActivity(Class<?> clz) {
+        openActivity(clz, null, 0);
+    }
+
+    public void openActivity(Class<?> clz, int requestCode) {
+        openActivity(clz, null, requestCode);
+    }
+
+    public void openActivity(Class<?> clz, Bundle bundle, int requestCode) {
+        Intent intent = new Intent(this, clz);
+        if (bundle != null) {
+            intent.putExtras(bundle);
+        }
+        if (requestCode == 0) {
+            IntentUtil.startPreviewActivity(this, intent, 0);
+        } else {
+            IntentUtil.startPreviewActivity(this, intent, requestCode);
+        }
+    }
 
 
 }
