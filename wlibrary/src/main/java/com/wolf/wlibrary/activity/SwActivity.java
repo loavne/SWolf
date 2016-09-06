@@ -5,8 +5,11 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.View;
 import android.view.WindowManager;
+import android.widget.TextView;
 
+import com.wolf.wlibrary.R;
 import com.wolf.wlibrary.base.SwActivityManager;
 import com.wolf.wlibrary.utils.IntentUtil;
 
@@ -20,23 +23,63 @@ public abstract class SwActivity extends AppCompatActivity{
 
     /** 是否透明状态栏 */
     private boolean isStatusBar = true;
-    /** 是否允许全屏 */
-    private boolean isAllowFullScreen = true;
-    /** 是否禁止旋转屏幕 */
-    private boolean isAllowRotateScreen = true;
-    /** 是否输出日志 */
-    private boolean isShowDebug = true;
 
     protected Toolbar mToolbar;
+    protected TextView mToolbarTitle;
+    protected TextView mToolbarSubTitle;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         setContentView(getLayoutId());
-
+        initToolbar();
         initData();
         SwActivityManager.getInstance().addActivity(this);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        if (getToolbar() != null && isShowBack()) {
+            showBack();
+        }
+    }
+
+    /**
+     * 是否显示后退按钮,默认显示,可在子类重写该方法.
+     * @return
+     */
+    protected boolean isShowBack() {
+        return true;
+    }
+
+
+    /**
+     * 版本号小于21的后退按钮图片
+     */
+    private void showBack(){
+        //setNavigationIcon必须在setSupportActionBar(toolbar);方法后面加入
+        getToolbar().setNavigationIcon(R.drawable.icon_back);
+        getToolbar().setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onBackPressed();
+            }
+        });
+    }
+
+    /**
+     * 初始化toolbar
+     */
+    protected void initToolbar(){
+        mToolbar = (Toolbar) findViewById(R.id.toolbar);
+        mToolbarTitle = (TextView) findViewById(R.id.toolbar_title);
+        mToolbarSubTitle = (TextView) findViewById(R.id.toolbar_subtitle);
+        if (mToolbar != null) {
+            //将Toolbar添加至界面
+            setSupportActionBar(mToolbar);
+        }
+        //...标题主标题设置
     }
 
     /**
@@ -91,5 +134,29 @@ public abstract class SwActivity extends AppCompatActivity{
         }
     }
 
+    public TextView getToolbarTitle() {
+        return mToolbarTitle;
+    }
+
+    /**
+     * 设置Toolbar标题
+     * @param title
+     */
+    public void setToolbarTitle(CharSequence title) {
+        if (mToolbarTitle != null) {
+            mToolbarTitle.setText(title);
+        } else {
+            getToolbar().setTitle(title);
+            setSupportActionBar(getToolbar());
+        }
+    }
+
+    /**
+     * 获取头部Toolbar
+     * @return
+     */
+    private Toolbar getToolbar() {
+        return (Toolbar) findViewById(R.id.toolbar);
+    }
 
 }
