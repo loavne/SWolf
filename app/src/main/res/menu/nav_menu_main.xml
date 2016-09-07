@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_home"
+            android:icon="@mipmap/ic_launcher"
+            android:title="标题"/>
+        <item
+            android:id="@+id/nav_mycollect"
+            android:icon="@mipmap/ic_launcher"
+            android:title="标题"/>
+    </group>
+
+    <group
+        android:id="@+id/other"
+        android:checkableBehavior="none">
+        <item
+            android:id="@+id/nav_change"
+            android:icon="@mipmap/ic_launcher"
+            android:title="标题"/>
+        <item
+            android:id="@+id/nav_settings"
+            android:icon="@mipmap/ic_launcher"
+            android:title="标题"/>
+    </group>
+
+</menu>
