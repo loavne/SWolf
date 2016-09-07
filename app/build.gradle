@@ -17,6 +17,9 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+
+    //兼容Android6.0
+    useLibrary 'org.apache.http.legacy'
 }
 
 dependencies {
@@ -25,4 +28,8 @@ dependencies {
     compile 'com.android.support:appcompat-v7:23.3.0'
     compile 'com.android.support:design:23.3.0'
     compile project(':wlibrary')
+
+    //bmob-sdk：Bmob的android sdk包，包含了Bmob的数据存储、文件等服务
+    compile 'cn.bmob.android:bmob-sdk:3.5.0'
+
 }
