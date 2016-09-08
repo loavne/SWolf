@@ -25,25 +25,13 @@ public abstract class SwActivity extends AppCompatActivity{
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        ButterKnife.bind(this);
+        //添加Activity到堆栈
+        SwActivityManager.getAppManager().addActivity(this);
         setContentView(getLayoutId());
+        //初始化黄油刀
+        ButterKnife.bind(this);
         initView();
-        SwActivityManager.getInstance().addActivity(this);
     }
-
-//    /**
-//     * 初始化toolbar
-//     */
-//    protected void initToolbar(){
-//        mToolbar = (Toolbar) findViewById(R.id.toolbar);
-//        mToolbarTitle = (TextView) findViewById(R.id.toolbar_title);
-//        mToolbarSubTitle = (TextView) findViewById(R.id.toolbar_subtitle);
-//        if (mToolbar != null) {
-//            //将Toolbar添加至界面
-//            setSupportActionBar(mToolbar);
-//        }
-//        //...标题主标题设置
-//    }
 
     /**
      * 获取布局资源Id
@@ -58,16 +46,26 @@ public abstract class SwActivity extends AppCompatActivity{
     /**
      * 透明状态栏
      */
-    private void setStatusBar() {
+    public void setStatusBar() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             getWindow().addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
         }
+//        //系统大于5.0
+//        if (Build.VERSION.SDK_INT >= 21) {
+//            //获取根视图
+//            View decorView = getWindow().getDecorView();
+//            //全屏,会将状态栏隐藏
+//            int option =View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION |View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_STABLE;
+//            decorView.setSystemUiVisibility(option);
+//            getWindow().setStatusBarColor(Color.TRANSPARENT);
+//            getWindow().setNavigationBarColor(Color.TRANSPARENT);
+//        }
     }
 
     /**
      * 透明导航栏
      */
-    private void setNavigation() {
+    public void setNavigation() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             getWindow().addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
         }
@@ -97,4 +95,11 @@ public abstract class SwActivity extends AppCompatActivity{
         }
     }
 
+    @Override
+    protected void onDestroy() {
+        // 结束Activity&从堆栈中移除
+        SwActivityManager.getAppManager().finishActivity(this);
+        super.onDestroy();
+        ButterKnife.unbind(this);
+    }
 }

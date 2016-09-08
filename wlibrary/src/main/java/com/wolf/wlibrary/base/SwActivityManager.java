@@ -3,60 +3,91 @@ package com.wolf.wlibrary.base;
 import android.app.Activity;
 import android.content.Context;
 
-import java.util.LinkedList;
-import java.util.List;
+import java.util.Stack;
+
 
 /**
- * 描述：用于处理退出程序时可以退出所有Activity, 而编写的通用类
+ * 应用程序Activity管理类：用于Activity管理和应用程序退出
  *
  * @author: swolf (https://github.com/loavne)
  * @date : 2016-09-02 11:07
  */
 public class SwActivityManager {
 
-    private List<Activity> mActivityList = new LinkedList<>();
+    private static Stack<Activity> activityStack;
+    private static SwActivityManager instance;
 
-    private volatile static SwActivityManager instance = null;
-
-    public SwActivityManager() {
+    private SwActivityManager() {
     }
 
-    public static SwActivityManager getInstance() {
+    /**
+     * 单一实例
+     */
+    public static SwActivityManager getAppManager() {
         if (instance == null) {
-            synchronized (SwActivityManager.class) {
-                if (instance == null) {
-                    instance = new SwActivityManager();
-                }
-            }
+            instance = new SwActivityManager();
         }
         return instance;
     }
 
     /**
-     * 添加Activity到容器中.
-     * @param activity
+     * 添加Activity到堆栈
      */
     public void addActivity(Activity activity) {
-        mActivityList.add(activity);
+        if (activityStack == null) {
+            activityStack = new Stack<Activity>();
+        }
+        activityStack.add(activity);
     }
 
     /**
-     * 移除Activity从容器中.
-     * @param activity
+     * 获取当前Activity（堆栈中最后一个压入的）
      */
-    public void removeActivity(Activity activity) {
-        mActivityList.remove(activity);
+    public Activity currentActivity() {
+        Activity activity = activityStack.lastElement();
+        return activity;
     }
 
     /**
-     * 遍历所有Activity并finish.
+     * 结束当前Activity（堆栈中最后一个压入的）
      */
-    public void clearAllActivity() {
-        for (Activity activity : mActivityList) {
-            if (activity != null) {
-                activity.finish();
+    public void finishActivity() {
+        Activity activity = activityStack.lastElement();
+        finishActivity(activity);
+    }
+
+    /**
+     * 结束指定的Activity
+     */
+    public void finishActivity(Activity activity) {
+        if (activity != null) {
+            activityStack.remove(activity);
+            activity.finish();
+            activity = null;
+        }
+    }
+
+    /**
+     * 结束指定类名的Activity
+     */
+    public void finishActivity(Class<?> cls) {
+        for (Activity activity : activityStack) {
+            if (activity.getClass().equals(cls)) {
+                finishActivity(activity);
             }
         }
+    }
+
+    /**
+     * 结束所有Activity
+     */
+    public void finishAllActivity() {
+        for (int i = 0, size = activityStack.size(); i < size; i++) {
+            if (null != activityStack.get(i)) {
+                activityStack.get(i).finish();
+            }
+        }
+        activityStack.clear();
     }
 
     /**
@@ -64,10 +95,11 @@ public class SwActivityManager {
      */
     public void AppExit(Context context) {
         try {
-            clearAllActivity();
-            android.app.ActivityManager activityMgr= (android.app.ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+            finishAllActivity();
+            android.app.ActivityManager activityMgr = (android.app.ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
             activityMgr.restartPackage(context.getPackageName());
             System.exit(0);
-        } catch (Exception e) { }
+        } catch (Exception e) {
+        }
     }
 }

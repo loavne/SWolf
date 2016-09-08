@@ -21,7 +21,7 @@ import com.wolf.swolf.R;
 public class FragmentOne extends Fragment{
 
     private RecyclerView mRecyclerView;
-    public String[] datas = new String[]{"1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1"};
+    public String[] datas = new String[]{"1","1","1","1","1","1","1","1","1","1"};
 
     @Nullable
     @Override

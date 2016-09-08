@@ -1,16 +1,37 @@
 package com.wolf.swolf.activity;
 
+import android.support.design.widget.NavigationView;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
 import android.widget.TextView;
 
 import com.wolf.swolf.R;
 import com.wolf.swolf.adapter.MyViewPagerAdapter;
+import com.wolf.swolf.fragment.FragmentNews;
 import com.wolf.swolf.fragment.FragmentOne;
 import com.wolf.wlibrary.activity.SwActivity;
 
+import butterknife.Bind;
+
 public class MainActivity extends SwActivity {
+
+    @Bind(R.id.tl_title)
+    TextView mTlTitle;
+    @Bind(R.id.toolbar)
+    Toolbar mToolbar;
+    @Bind(R.id.tabLayout)
+    TabLayout mTabLayout;
+    @Bind(R.id.viewPager)
+    ViewPager mViewPager;
+    @Bind(R.id.nav_view)
+    NavigationView mNavView;
+    @Bind(R.id.drawerLayout)
+    DrawerLayout mDrawerLayout;
+
+    private ActionBarDrawerToggle mDrawerToggle;
 
     @Override
     public int getLayoutId() {
@@ -19,24 +40,25 @@ public class MainActivity extends SwActivity {
 
     @Override
     protected void initView() {
-        Toolbar mToolbar = (Toolbar) findViewById(R.id.toolbar);
-        ViewPager mViewPager = (ViewPager) findViewById(R.id.viewPager);
-        TabLayout mTabLayout = (TabLayout) findViewById(R.id.tabLayout);
-
         //设置toolbar
         setSupportActionBar(mToolbar);
+        //设置返回键可用
+        getSupportActionBar().setHomeButtonEnabled(true);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        mToolbar.setNavigationIcon(R.drawable.icon_back);
+        //创建返回键，并实现打开关/闭监听
+        mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, mToolbar, R.string.open, R.string.close);
 
-        TextView tl_title = (TextView) findViewById(R.id.tl_title);
-        tl_title.setText("标题");
+        mDrawerLayout.addDrawerListener(mDrawerToggle);
 
+//        mDrawerLayout.setScrimColor(Color.TRANSPARENT); //去除侧边阴影
+
+        mTlTitle.setText("标题");
         mToolbar.setTitle("");
-        mToolbar.setSubtitle("");
 
         MyViewPagerAdapter viewPagerAdapter = new MyViewPagerAdapter(getSupportFragmentManager());
         viewPagerAdapter.addFragment(new FragmentOne(), "first");
-        viewPagerAdapter.addFragment(new FragmentOne(), "second");
+        viewPagerAdapter.addFragment(new FragmentNews(), "second");
         viewPagerAdapter.addFragment(new FragmentOne(), "third");
         mViewPager.setAdapter(viewPagerAdapter);
 
@@ -46,4 +68,5 @@ public class MainActivity extends SwActivity {
         mTabLayout.setupWithViewPager(mViewPager);
 
     }
+
 }
