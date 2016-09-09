@@ -30,7 +30,7 @@ public abstract class SwFragment extends Fragment{
                 ((ViewGroup)rootView).addView(contentView);
             }
         }
-        ButterKnife.bind(this, rootView);
+        ButterKnife.bind(getActivity());
         return rootView;
     }
 
