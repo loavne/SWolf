@@ -7,8 +7,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.wolf.wlibrary.R;
-
 import butterknife.ButterKnife;
 
 /**
@@ -19,39 +17,38 @@ import butterknife.ButterKnife;
  */
 public abstract class SwFragment extends Fragment{
 
-    private View rootView, contentView;
+    private View rootView;
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         if (rootView == null) {
-            rootView = inflater.inflate(R.layout.layout_base_fragment, container, false);
-            if (contentView != null) {
-                ((ViewGroup)rootView).addView(contentView);
-            }
+            rootView = inflater.inflate(getLayoutId(), container, false);
         }
         ButterKnife.bind(getActivity());
+        initView();
         return rootView;
     }
+
+
 
 
     @Override
     public void setUserVisibleHint(boolean isVisibleToUser) {
         super.setUserVisibleHint(isVisibleToUser);
         if (isVisibleToUser) {
-            if (contentView == null) {
-                contentView = LayoutInflater.from(getContext()).inflate(getLayoutId(), null);
-                if (rootView != null) {
-                    ((ViewGroup)rootView).addView(contentView);
-                }
-            }
-            lazyData();
+            lazy();
         }
     }
 
-    public abstract int getLayoutId();
+    protected abstract int getLayoutId();
 
-    protected abstract void lazyData();
+    protected abstract void initView();
+
+    /**
+     * 懒加载数据 and 懒初始化views
+     */
+    protected abstract void lazy();
 
     @Override
     public void onDestroy() {

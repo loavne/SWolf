@@ -9,13 +9,20 @@ import com.wolf.wlibrary.fragment.SwFragment;
  * @date : 2016-09-09 14:34
  */
 public class FragmentPerson extends SwFragment{
+
+
     @Override
     public int getLayoutId() {
         return 0;
     }
 
     @Override
-    protected void lazyData() {
+    protected void initView() {
+
+    }
+
+    @Override
+    protected void lazy() {
 
     }
 }

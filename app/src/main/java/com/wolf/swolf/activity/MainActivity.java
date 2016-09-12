@@ -1,8 +1,9 @@
 package com.wolf.swolf.activity;
 
+import android.os.Bundle;
 import android.support.design.widget.NavigationView;
-import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -31,8 +32,6 @@ public class MainActivity extends SwActivity implements NavigationView.OnNavigat
     TextView mTlTitle;
     @Bind(R.id.toolbar)
     Toolbar mToolbar;
-    @Bind(R.id.tabLayout)
-    TabLayout mTabLayout;
     @Bind(R.id.content_frame_layout)
     FrameLayout mFrameLayout;
     @Bind(R.id.nav_view)
@@ -40,17 +39,29 @@ public class MainActivity extends SwActivity implements NavigationView.OnNavigat
     @Bind(R.id.drawerLayout)
     DrawerLayout mDrawerLayout;
 
-    private List<Fragment> fragments;
     private ActionBarDrawerToggle mDrawerToggle;
-    private FragmentTransaction mTransaction;
+    private FragmentTransaction mFragmentTransaction;
 
-    private int index;
-    private int currentIndex;
-
+    private List<Fragment> fragments = new ArrayList<>();
+    //临时fragment
+    private Fragment mFragment;
     private FragmentNews mFragmentNews;
     private FragmentGirls mFragmentGirls;
     private FragmentPerson mFragmentPerson;
     private FragmentSettings mFragmentSettings;
+
+    /**
+     * Fragment的TAG 用于解决app内存被回收之后导致的fragment重叠问题
+     */
+    private static final String[] FRAGEMENT_TAG = {"news", "girls", "person", "settings"};
+
+    /**
+     * 上一次界面 onSaveInstanceState 之前的tab被选中的状态 key 和 value
+     */
+    private static final String SELECTED_INDEX = "selected_index";
+    private int currentIndex = 0;
+    private int mMenuItem;
+    private FragmentManager mFragmentManager;
 
     @Override
     public int getLayoutId() {
@@ -58,7 +69,22 @@ public class MainActivity extends SwActivity implements NavigationView.OnNavigat
     }
 
     @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        //防止activity被销毁，fragment重叠
+        if (savedInstanceState != null) {
+            currentIndex = savedInstanceState.getInt(SELECTED_INDEX, currentIndex);
+            mFragmentNews = (FragmentNews) mFragmentManager.findFragmentByTag(FRAGEMENT_TAG[0]);
+            mFragmentGirls = (FragmentGirls) mFragmentManager.findFragmentByTag(FRAGEMENT_TAG[1]);
+            mFragmentPerson = (FragmentPerson) mFragmentManager.findFragmentByTag(FRAGEMENT_TAG[2]);
+            mFragmentSettings = (FragmentSettings) mFragmentManager.findFragmentByTag(FRAGEMENT_TAG[3]);
+        }
+    }
+
+    @Override
     protected void initView() {
+        mFragmentManager = getSupportFragmentManager();
+        mFragmentTransaction = mFragmentManager.beginTransaction();
         //设置toolbar
         setSupportActionBar(mToolbar);
         //设置返回键可用
@@ -70,7 +96,6 @@ public class MainActivity extends SwActivity implements NavigationView.OnNavigat
 
         mDrawerLayout.addDrawerListener(mDrawerToggle);
 //        mDrawerLayout.setScrimColor(Color.TRANSPARENT); //去除侧边阴影
-        mTlTitle.setText("标题");
         mToolbar.setTitle("");
 //        MyViewPagerAdapter viewPagerAdapter = new MyViewPagerAdapter(getSupportFragmentManager());
 //        viewPagerAdapter.addFragment(new FragmentOne(), "first");
@@ -84,16 +109,24 @@ public class MainActivity extends SwActivity implements NavigationView.OnNavigat
 //        mTabLayout.setupWithViewPager(mViewPager);
         mNavView.setNavigationItemSelectedListener(this);
         initFragment();
-
         initSlidingHeader();
+
+        //设置第一个显示的fragment
+        mFragmentTransaction.add(R.id.content_frame_layout,mFragment, FRAGEMENT_TAG[0]).commit();
+        mTlTitle.setText(getResources().getString(R.string.sliding_menu_news));
     }
 
     private void initFragment() {
-        fragments = new ArrayList<>();
-        fragments.add(new FragmentNews());
-        fragments.add(new FragmentGirls());
-        fragments.add(new FragmentPerson());
-        fragments.add(new FragmentSettings());
+        mFragmentNews = new FragmentNews();
+        mFragmentGirls = new FragmentGirls();
+        mFragmentPerson = new FragmentPerson();
+        mFragmentSettings = new FragmentSettings();
+        fragments.add(mFragmentNews);
+        fragments.add(mFragmentGirls);
+        fragments.add(mFragmentPerson);
+        fragments.add(mFragmentSettings);
+
+        mFragment = mFragmentNews;
     }
 
     private void initSlidingHeader() {
@@ -112,55 +145,65 @@ public class MainActivity extends SwActivity implements NavigationView.OnNavigat
 
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
-        mTransaction = getSupportFragmentManager().beginTransaction();
-        switch (item.getItemId()) {
-            case R.id.nav_news:
-                if (mFragmentNews == null) {
-                    mFragmentNews = new FragmentNews();
-                    mTransaction.add(R.id.content_frame_layout, mFragmentNews);
-                } else {
-                    mTransaction.show(mFragmentNews);
-                }
-                selectTab(getResources().getString(R.string.sliding_menu_news), item);
-                break;
-            case R.id.nav_girls:
-                if (mFragmentGirls == null) {
-                    mFragmentGirls = new FragmentGirls();
-                    mTransaction.add(R.id.content_frame_layout, mFragmentGirls);
-                } else {
-                    mTransaction.show(mFragmentGirls);
-                }
-                selectTab(getResources().getString(R.string.sliding_menu_girls), item);
-                break;
-            case R.id.nav_person:
-                if (mFragmentPerson == null) {
-                    mFragmentPerson = new FragmentPerson();
-                    mTransaction.add(R.id.content_frame_layout, mFragmentPerson);
-                } else {
-                    mTransaction.show(mFragmentPerson);
-                }
-                selectTab(getResources().getString(R.string.sliding_menu_person), item);
-                break;
-            case R.id.nav_settings:
-                if (mFragmentSettings == null) {
-                    mFragmentSettings = new FragmentSettings();
-                    mTransaction.add(R.id.content_frame_layout, mFragmentSettings);
-                } else {
-                    mTransaction.show(mFragmentSettings);
-                }
+        mMenuItem = item.getItemId();
 
-                selectTab(getResources().getString(R.string.sliding_menu_settings), item);
-                break;
-        }
+        //选择选中的item
+        selectMenuItem(mMenuItem);
 
-        mTransaction.commitAllowingStateLoss();
-        return false;
+        item.setChecked(true);
+        mDrawerLayout.closeDrawers();
+
+        return true;
     }
 
-    private void selectTab(String title, MenuItem item) {
-        item.setChecked(true);
-        item.setTitle(title);
-        mTlTitle.setText(title);
-        mDrawerLayout.closeDrawers();
+    private void selectMenuItem(int menuItem) {
+        switch (menuItem) {
+            case R.id.nav_news:
+                if (mFragmentNews == null)
+                    mFragmentNews = new FragmentNews();
+                switchFragment(mFragment, mFragmentNews, 0);
+                mTlTitle.setText(getResources().getString(R.string.sliding_menu_news));
+                break;
+            case R.id.nav_girls:
+                if (mFragmentGirls == null)
+                    mFragmentGirls = new FragmentGirls();
+                switchFragment(mFragment, mFragmentGirls, 1);
+                mTlTitle.setText(getResources().getString(R.string.sliding_menu_girls));
+                break;
+            case R.id.nav_person:
+                if (mFragmentPerson == null)
+                    mFragmentPerson = new FragmentPerson();
+                switchFragment(mFragment, mFragmentPerson, 2);
+                mTlTitle.setText(getResources().getString(R.string.sliding_menu_person));
+                break;
+            case R.id.nav_settings:
+                if (mFragmentSettings == null)
+                    mFragmentSettings = new FragmentSettings();
+                switchFragment(mFragment, mFragmentSettings, 3);
+                mTlTitle.setText(getResources().getString(R.string.sliding_menu_settings));
+                break;
+        }
+    }
+
+    public void switchFragment(Fragment from, Fragment to, int index) {
+        currentIndex = index;
+        if (mFragment != to) {
+            mFragment = to;
+            // 先判断是否被add过
+            if (!to.isAdded()) {
+                // 隐藏当前的fragment，add下一个到Activity中
+                mFragmentTransaction.hide(from).add(R.id.content_frame_layout, to, FRAGEMENT_TAG[index]);
+            } else {
+                // 隐藏当前的fragment，显示下一个
+                mFragmentTransaction.hide(from).show(to);
+            }
+        }
+    }
+
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt(SELECTED_INDEX, currentIndex);
     }
 }
